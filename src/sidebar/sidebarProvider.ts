@@ -288,6 +288,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     const styleUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, 'out', 'webview', 'assets', 'main.css')
     );
+    const codiconsUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, 'out', 'webview', 'codicon.css')
+    );
 
     const nonce = getNonce();
     // 最小限のCSP - 問題の切り分けのため
@@ -296,7 +299,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https: data:; script-src 'nonce-${nonce}' ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline';">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${webview.cspSource}; img-src ${webview.cspSource} https: data:; script-src 'nonce-${nonce}' ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline';">
+        <link href="${codiconsUri}" rel="stylesheet">
         <link href="${styleUri}" rel="stylesheet">
         <title>DataDeck</title>
       </head>

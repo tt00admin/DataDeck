@@ -117,17 +117,17 @@ h1 {
 .icon-button {
   border: 1px solid var(--vscode-button-border, transparent);
   border-radius: 6px;
-  padding: 4px 8px;
+  padding: 4px;
   color: var(--vscode-button-secondaryForeground);
   background: var(--vscode-button-secondaryBackground);
   cursor: pointer;
   font-size: 16px;
   line-height: 1;
   min-height: 28px;
+  min-width: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: "codicon";
 }
 
 .icon-button:hover {
