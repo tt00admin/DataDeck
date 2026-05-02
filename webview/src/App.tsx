@@ -21,7 +21,6 @@ function App() {
   const [filterDateFrom, setFilterDateFrom] = useState<string>('');
   const [filterDateTo, setFilterDateTo] = useState<string>('');
   const [filterFileName, setFilterFileName] = useState<string>('');
-  const [expandedImage, setExpandedImage] = useState<Clip | null>(null);
 
   useEffect(() => {
     // VS Code APIを取得
@@ -92,11 +91,9 @@ function App() {
   }, []);
 
   const handleOpenImage = useCallback((clip: Clip) => {
-    setExpandedImage(clip);
-  }, []);
-
-  const handleCloseImage = useCallback(() => {
-    setExpandedImage(null);
+    if (window.vscode) {
+      window.vscode.postMessage({ type: 'openImage', clip });
+    }
   }, []);
 
   if (!deck) {
@@ -177,21 +174,6 @@ function App() {
         onReorder={handleReorder}
         onOpenImage={handleOpenImage}
       />
-
-      {expandedImage?.content.imagePath && (
-        <div className="image-modal" role="dialog" aria-modal="true" aria-label="Expanded clip image" onClick={handleCloseImage}>
-          <div className="image-modal-panel" onClick={(event) => event.stopPropagation()}>
-            <div className="image-modal-header">
-              <div>
-                <h2>{expandedImage.title || 'Image clip'}</h2>
-                <p>{expandedImage.content.mimeType || 'image'}</p>
-              </div>
-              <button onClick={handleCloseImage}>Close</button>
-            </div>
-            <img src={expandedImage.content.imagePath} alt={expandedImage.title || 'Expanded clip image'} />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -25,7 +25,7 @@ function ClipCard({ clip, onDelete, onTogglePin, onOpenImage }: ClipCardProps) {
           return (
             <div className="clip-image-container">
               <img 
-                src={clip.content.imagePath} 
+                src={clip.content.imageWebviewUri || clip.content.imagePath} 
                 alt={clip.title || 'clip image'}
                 loading="lazy"
                 style={{ maxWidth: '100%', height: 'auto' }}

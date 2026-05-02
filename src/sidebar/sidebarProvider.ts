@@ -69,6 +69,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             await this._reorderClips(message.startIndex, message.endIndex);
             this._refreshDeck();
             break;
+          case 'openImage':
+            await this._openImageInNewWindow(message.clip);
+            break;
         }
       });
       console.log('DataDeck: Webview view resolved successfully');
@@ -115,7 +118,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           const webviewUri = webview.asWebviewUri(fileUri);
           return {
             ...clip,
-            content: { ...clip.content, imagePath: webviewUri.toString() }
+            content: { ...clip.content, imageWebviewUri: webviewUri.toString() }
           };
         } catch {
           return clip;
@@ -190,6 +193,84 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     } catch (error) {
       vscode.window.showErrorMessage(`Failed to jump to cell: ${error}`);
     }
+  }
+
+  private async _openImageInNewWindow(clip: any) {
+    if (!clip || clip.type !== 'image' || !clip.content.imagePath) {
+      return;
+    }
+
+    // 新しいWebviewパネルを作成
+    const panel = vscode.window.createWebviewPanel(
+      'imagePreview',
+      clip.title || 'Image Preview',
+      vscode.ViewColumn.Beside, // 現在のエディタの横に開く
+      {
+        enableScripts: false,
+        retainContextWhenHidden: true,
+        localResourceRoots: [
+          this.storageService.getStorageUri(),
+          this._extensionUri
+        ]
+      }
+    );
+
+    // 画像のURIを取得（クリップのimagePathから）
+    let imageUri: vscode.Uri;
+    try {
+      // クリップのimagePathは元のファイル名（パス）なので、ストレージからURIを取得
+      imageUri = this.storageService.getImageUri(clip.content.imagePath);
+    } catch (error) {
+      console.error('Failed to get image URI:', error);
+      // フォールバック: imagePathをそのままURIとして使用
+      imageUri = vscode.Uri.parse(clip.content.imagePath);
+    }
+
+    // Webviewパネル内で画像を全画面表示するHTML
+    panel.webview.html = `
+      <!DOCTYPE html>
+      <html lang="ja">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${clip.title || 'Image Preview'}</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { 
+            background-color: #1e1e1e; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            overflow: hidden;
+          }
+          .image-container {
+            max-width: 100%;
+            max-height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          img {
+            max-width: 100%;
+            max-height: 100vh;
+            object-fit: contain;
+            border-radius: 4px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="image-container">
+          <img src="${panel.webview.asWebviewUri(imageUri)}" alt="${clip.title || 'Image'}" />
+        </div>
+      </body>
+      </html>
+    `;
+
+    // パネルが閉じられた時の処理
+    panel.onDidDispose(() => {
+      // クリーンアップが必要な場合はここに記述
+    });
   }
 
   private _getHtmlForWebview(webview: vscode.Webview): string {
