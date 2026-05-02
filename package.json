@@ -1,0 +1,118 @@
+{
+  "name": "datadeck",
+  "type": "module",
+  "displayName": "DataDeck for VS Code",
+  "description": "データサイエンティストの試行錯誤過程を支援するクリップボード型成果物管理システム",
+  "version": "1.0.1",
+  "publisher": "datadeck",
+  "license": "MIT",
+  "keywords": [
+    "data-science",
+    "notebook",
+    "jupyter",
+    "visualization",
+    "marimo",
+    "clipboard",
+    "productivity"
+  ],
+  "categories": [
+    "Data Science",
+    "Notebooks"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/datadeck/datadeck.git"
+  },
+  "homepage": "https://github.com/datadeck/datadeck#readme",
+  "bugs": {
+    "url": "https://github.com/datadeck/datadeck/issues"
+  },
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "activationEvents": [
+    "onView:datadeck.sidebar",
+    "onCommand:datadeck.clipOutput",
+    "onCommand:datadeck.exportMarkdown",
+    "onCommand:datadeck.clearDeck"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "datadeck",
+          "title": "DataDeck",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "datadeck": [
+        {
+          "id": "datadeck.sidebar",
+          "name": "DataDeck",
+          "type": "webview"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "datadeck.clipOutput",
+        "title": "Add to Deck",
+        "category": "DataDeck",
+        "icon": "resources/add-to-deck.svg"
+      },
+      {
+        "command": "datadeck.exportMarkdown",
+        "title": "Export to Markdown"
+      },
+      {
+        "command": "datadeck.clearDeck",
+        "title": "Clear All Clips"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "datadeck.clipOutput",
+        "key": "ctrl+shift+d",
+        "mac": "cmd+shift+d"
+      }
+    ],
+    "menus": {
+      "notebook/cell/title": [
+        {
+          "command": "datadeck.clipOutput",
+          "when": "notebookType == 'jupyter-notebook' || resourceExtname == '.ipynb'",
+          "group": "inline@1"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./tsconfig.json",
+    "watch": "tsc -watch -p ./tsconfig.json",
+    "webpack": "webpack --mode development",
+    "webpack:prod": "webpack --mode production",
+    "webview:dev": "cd webview && npm run dev",
+    "webview:build": "cd webview && npm run build",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/uuid": "^10.0.0",
+    "uuid": "^14.0.0"
+  }
+}

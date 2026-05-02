@@ -1,0 +1,16 @@
+.gitignore
+coverage/**
+src/**
+webview/src/**
+webview/node_modules/**
+webview/package-lock.json
+webview/tsconfig.json
+node_modules/**
+!node_modules/uuid/**
+out/__tests__/**
+out/__mocks__/**
+*.vsix
+*.tsbuildinfo
+task.md
+要件.md
+設計.md
