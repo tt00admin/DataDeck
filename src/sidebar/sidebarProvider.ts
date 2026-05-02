@@ -74,6 +74,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             break;
         }
       });
+
+      // 可視性変更時の処理：タブ切り替え時に最新のデッキを取得
+      webviewView.onDidChangeVisibility(async () => {
+        if (webviewView.visible) {
+          await this._sendDeck();
+        }
+      });
+
       console.log('DataDeck: Webview view resolved successfully');
     } catch (error) {
       console.error('DataDeck: Error in resolveWebviewView:', error);

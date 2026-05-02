@@ -66,6 +66,12 @@ function App() {
     }
   }, []);
 
+  const handleReload = useCallback(() => {
+    if (window.vscode) {
+      window.vscode.postMessage({ type: 'requestDeck' });
+    }
+  }, []);
+
   const handleDelete = useCallback((clipId: string) => {
     if (window.vscode) {
       window.vscode.postMessage({ type: 'deleteClip', clipId });
@@ -105,66 +111,67 @@ function App() {
 
   return (
     <div className="app">
-      <header className="app-header">
-        <div>
-          <div className="eyebrow">DataDeck</div>
-          <h1>Deck</h1>
+      {/* 1段目：ノートブックファイル名フィルター、日付範囲フィルター */}
+      <div className="top-section">
+        <div className="notebook-filter">
+          <input
+            type="text"
+            placeholder="Notebook file name"
+            value={filterFileName}
+            onChange={(e) => setFilterFileName(e.target.value)}
+            aria-label="Filter by notebook file name"
+          />
         </div>
-        <div className="stats" aria-label="Clip totals">
-          <span>{pinnedCount} pinned</span>
-          <span>{totalClips} total</span>
+        <div className="date-range">
+          <input
+            type="date"
+            value={filterDateFrom}
+            onChange={(e) => setFilterDateFrom(e.target.value)}
+            aria-label="Filter from date"
+          />
+          <span>~</span>
+          <input
+            type="date"
+            value={filterDateTo}
+            onChange={(e) => setFilterDateTo(e.target.value)}
+            aria-label="Filter to date"
+          />
         </div>
-      </header>
 
-      <div className="toolbar">
-        <input
-          type="text"
-          placeholder="Search clips, tags, memo, code"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <div className="toolbar-actions">
-          <button className="primary-button" onClick={handleClip}>Add</button>
-          <button onClick={handleExport}>Export</button>
-        </div>
       </div>
 
-      <div className="filters">
-        <select 
-          value={filterType} 
-          onChange={(e) => setFilterType(e.target.value)}
-          aria-label="Filter by type"
-        >
-          <option value="">All Types</option>
-          <option value="image">Image</option>
-          <option value="html">HTML</option>
-          <option value="dataframe">DataFrame</option>
-          <option value="text">Text</option>
-        </select>
+      {/* 2段目：検索、タイプ、アイコンボタン */}
+      <div className="bottom-section">
+        <div className="action-row">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search clips"
+          />
+          <select 
+            value={filterType} 
+            onChange={(e) => setFilterType(e.target.value)}
+            aria-label="Filter by type"
+          >
+            <option value="">All Types</option>
+            <option value="image">Image</option>
+            <option value="html">HTML</option>
+            <option value="dataframe">DataFrame</option>
+            <option value="text">Text</option>
+          </select>
+          <button className="icon-button" onClick={handleClip} title="Add Clip">
+            <i className="codicon codicon-add"></i>
+          </button>
+          <button className="icon-button" onClick={handleExport} title="Export Markdown">
+            <i className="codicon codicon-export"></i>
+          </button>
+          <button className="icon-button" onClick={handleReload} title="Reload Deck">
+            <i className="codicon codicon-refresh"></i>
+          </button>
 
-        <input
-          type="date"
-          placeholder="From"
-          value={filterDateFrom}
-          onChange={(e) => setFilterDateFrom(e.target.value)}
-          aria-label="Filter from date"
-        />
-
-        <input
-          type="date"
-          placeholder="To"
-          value={filterDateTo}
-          onChange={(e) => setFilterDateTo(e.target.value)}
-          aria-label="Filter to date"
-        />
-
-        <input
-          type="text"
-          placeholder="Notebook file name"
-          value={filterFileName}
-          onChange={(e) => setFilterFileName(e.target.value)}
-          aria-label="Filter by notebook file name"
-        />
+        </div>
       </div>
 
       <Deck
@@ -179,3 +186,4 @@ function App() {
 }
 
 export default App;
+
