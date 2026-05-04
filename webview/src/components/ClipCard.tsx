@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Clip } from '../../../src/types';
 
 // VS Code APIの型定義
@@ -16,10 +16,15 @@ interface ClipCardProps {
   onTogglePin: (clipId: string) => void;
   onOpenImage?: (clip: Clip) => void;
   onOpenClip?: (clip: Clip) => void;
+  onUpdateClip?: (clipId: string, updates: { title?: string; memo?: string; tags?: string[] }) => void;
   isCarousel?: boolean;
 }
 
-function ClipCard({ clip, onDelete, onTogglePin, onOpenImage, onOpenClip, isCarousel }: ClipCardProps) {
+function ClipCard({ clip, onDelete, onTogglePin, onOpenImage, onOpenClip, onUpdateClip, isCarousel }: ClipCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(clip.title || '');
+  const [editMemo, setEditMemo] = useState(clip.memo || '');
+  const [editTags, setEditTags] = useState(clip.tags?.join(', ') || '');
   const formatDate = (timestamp: number) => {
     return new Intl.DateTimeFormat(undefined, {
       month: 'short',
@@ -27,6 +32,31 @@ function ClipCard({ clip, onDelete, onTogglePin, onOpenImage, onOpenClip, isCaro
       hour: '2-digit',
       minute: '2-digit'
     }).format(new Date(timestamp));
+  };
+
+  const handleEditClick = () => {
+    setEditTitle(clip.title || '');
+    setEditMemo(clip.memo || '');
+    setEditTags(clip.tags?.join(', ') || '');
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = () => {
+    const tags = editTags
+      .split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+    
+    onUpdateClip?.(clip.id, {
+      title: editTitle.trim() || undefined,
+      memo: editMemo.trim() || undefined,
+      tags
+    });
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
   };
 
   const renderContent = () => {
@@ -77,12 +107,67 @@ function ClipCard({ clip, onDelete, onTogglePin, onOpenImage, onOpenClip, isCaro
     }
   };
 
+  if (isEditing) {
+    return (
+      <div className="clip-card editing" onClick={(e) => e.stopPropagation()}>
+        <div className="edit-form">
+          <div className="edit-field">
+            <label>Name</label>
+            <input
+              type="text"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              placeholder="Clip name"
+              autoFocus
+            />
+          </div>
+          <div className="edit-field">
+            <label>Memo</label>
+            <textarea
+              value={editMemo}
+              onChange={(e) => setEditMemo(e.target.value)}
+              placeholder="Add a note..."
+              rows={3}
+            />
+          </div>
+          <div className="edit-field">
+            <label>Tags (comma separated)</label>
+            <input
+              type="text"
+              value={editTags}
+              onChange={(e) => setEditTags(e.target.value)}
+              placeholder="tag1, tag2, tag3"
+            />
+          </div>
+          <div className="edit-actions">
+            <button className="primary-button" onClick={handleSaveEdit}>
+              Save
+            </button>
+            <button className="secondary-button" onClick={handleCancelEdit}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`clip-card ${clip.pinned ? 'pinned' : ''}`} onClick={handleClick}>
       <div className="clip-header">
         <span className="drag-handle" style={{ cursor: 'grab', marginRight: '4px', fontSize: '14px' }}>☰</span>
         {!isCarousel && <span className="clip-type">{clip.type}</span>}
         <div className="clip-actions">
+          <button
+            className="icon-button"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleEditClick();
+            }}
+            title="Edit"
+          >
+            <span className="codicon codicon-edit"></span>
+          </button>
           <button
             className="icon-button"
             onClick={(event) => {

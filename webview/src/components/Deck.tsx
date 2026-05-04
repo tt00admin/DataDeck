@@ -10,9 +10,10 @@ interface DeckProps {
   onOpenImage?: (clip: Clip) => void;
   onOpenClip?: (clip: Clip) => void;
   onReorderRecent?: (type: string, startIndex: number, endIndex: number) => void;
+  onUpdateClip?: (clipId: string, updates: { title?: string; memo?: string; tags?: string[] }) => void;
 }
 
-function Deck({ clips, onDelete, onTogglePin, onReorder, onOpenImage, onOpenClip, onReorderRecent }: DeckProps) {
+function Deck({ clips, onDelete, onTogglePin, onReorder, onOpenImage, onOpenClip, onReorderRecent, onUpdateClip }: DeckProps) {
   const sortedClips = [...clips].sort((a, b) => (a.order ?? a.timestamp) - (b.order ?? b.timestamp));
   const pinnedClips = sortedClips.filter(clip => clip.pinned);
   const recentClips = sortedClips
@@ -100,6 +101,7 @@ function Deck({ clips, onDelete, onTogglePin, onReorder, onOpenImage, onOpenClip
                   onTogglePin={onTogglePin}
                   onOpenImage={onOpenImage}
                   onOpenClip={onOpenClip}
+                  onUpdateClip={onUpdateClip}
                 />
               </div>
             );
@@ -156,6 +158,7 @@ function Deck({ clips, onDelete, onTogglePin, onReorder, onOpenImage, onOpenClip
                       onTogglePin={onTogglePin}
                       onOpenImage={onOpenImage}
                       onOpenClip={onOpenClip}
+                      onUpdateClip={onUpdateClip}
                       isCarousel={true}
                     />
                   </div>

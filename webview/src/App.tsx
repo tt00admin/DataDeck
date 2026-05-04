@@ -114,6 +114,12 @@ function App() {
     }
   }, []);
 
+  const handleUpdateClip = useCallback((clipId: string, updates: { title?: string; memo?: string; tags?: string[] }) => {
+    if (window.vscode) {
+      window.vscode.postMessage({ type: 'updateClip', clipId, updates });
+    }
+  }, []);
+
   if (!deck) {
     return <div className="loading-state">Loading DataDeck...</div>;
   }
@@ -194,6 +200,7 @@ function App() {
         onOpenImage={handleOpenImage}
         onOpenClip={handleOpenClip}
         onReorderRecent={handleReorderRecent}
+        onUpdateClip={handleUpdateClip}
       />
     </div>
   );

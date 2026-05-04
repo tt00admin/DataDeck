@@ -78,6 +78,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             await this._reorderRecentClips(message.clipType, message.startIndex, message.endIndex);
             this._refreshDeck();
             break;
+          case 'updateClip':
+            await this._updateClip(message.clipId, message.updates);
+            this._refreshDeck();
+            break;
         }
       });
 
@@ -179,6 +183,23 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     const clip = deck.clips.find((c: any) => c.id === clipId);
     if (clip) {
       clip.pinned = !clip.pinned;
+      await this.storageService.saveDeck(deck);
+    }
+  }
+
+  private async _updateClip(clipId: string, updates: { title?: string; memo?: string; tags?: string[] }) {
+    const deck = await this.storageService.loadDeck();
+    const clip = deck.clips.find((c: any) => c.id === clipId);
+    if (clip) {
+      if (updates.title !== undefined) {
+        clip.title = updates.title;
+      }
+      if (updates.memo !== undefined) {
+        clip.memo = updates.memo;
+      }
+      if (updates.tags !== undefined) {
+        clip.tags = updates.tags;
+      }
       await this.storageService.saveDeck(deck);
     }
   }

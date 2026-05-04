@@ -555,3 +555,63 @@ h1 {
     color: var(--vscode-descriptionForeground);
     font-size: 11px;
   }
+
+/* Edit form styles */
+.clip-card.editing {
+  padding: 12px;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edit-field label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vscode-descriptionForeground);
+}
+
+.edit-field input,
+.edit-field textarea {
+  width: 100%;
+  min-height: 30px;
+  border: 1px solid var(--vscode-input-border, transparent);
+  border-radius: 6px;
+  padding: 5px 8px;
+  color: var(--vscode-input-foreground);
+  background: var(--vscode-input-background);
+  font-size: 13px;
+}
+
+.edit-field textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.edit-actions button {
+  min-height: 28px;
+  padding: 4px 12px;
+}
+
+.secondary-button {
+  color: var(--vscode-button-secondaryForeground);
+  background: var(--vscode-button-secondaryBackground);
+}
+
+.secondary-button:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
