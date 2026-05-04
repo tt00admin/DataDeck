@@ -12,6 +12,7 @@ export interface Clip {
   };
   content: {
     imagePath?: string;
+    imageWebviewUri?: string;
     htmlContent?: string;
     textContent?: string;
     mimeType?: string;

@@ -39,7 +39,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       webviewView.webview.html = html;
       console.log('DataDeck: Webview HTML set successfully');
 
-      // メッセージハンドラ
       webviewView.webview.onDidReceiveMessage(async (message) => {
         switch (message.type) {
           case 'clipActiveCell':
@@ -72,10 +71,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           case 'openImage':
             await this._openImageInNewWindow(message.clip);
             break;
+          case 'openClip':
+            await this._openClip(message.clip);
+            break;
+          case 'reorderRecentClips':
+            await this._reorderRecentClips(message.clipType, message.startIndex, message.endIndex);
+            this._refreshDeck();
+            break;
         }
       });
 
-      // 可視性変更時の処理：タブ切り替え時に最新のデッキを取得
       webviewView.onDidChangeVisibility(async () => {
         if (webviewView.visible) {
           await this._sendDeck();
@@ -95,7 +100,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
     const deck = await this.storageService.loadDeck();
     const webview = this._view.webview;
-      const convertedClips = this._convertClipsForWebview(deck.clips as any[], webview);
+    const convertedClips = this._convertClipsForWebview(deck.clips as any[], webview);
     const convertedDeck = { ...deck, clips: convertedClips };
     this._view.webview.postMessage({ type: 'deckUpdate', deck: convertedDeck });
   }
@@ -140,7 +145,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     try {
       const deck = await this.storageService.loadDeck();
       if (deck.clips.length === 0) {
-        vscode.window.showInformationMessage('エクスポートするクリップがありません');
+        vscode.window.showInformationMessage('No clips to export');
         return;
       }
       const outputUri = await vscode.window.showSaveDialog({
@@ -149,16 +154,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       });
       if (outputUri) {
         await MarkdownGenerator.generateMarkdown(deck.clips, outputUri.fsPath);
-        vscode.window.showInformationMessage(`Markdownをエクスポートしました: ${outputUri.fsPath}`);
+        vscode.window.showInformationMessage(`Markdown exported: ${outputUri.fsPath}`);
       }
     } catch (error) {
-      vscode.window.showErrorMessage(`エクスポートに失敗しました: ${error}`);
+      vscode.window.showErrorMessage(`Export failed: ${error}`);
     }
   }
 
   private async _deleteClip(clipId: string) {
     const deck = await this.storageService.loadDeck();
-        const clip = deck.clips.find((c: any) => c.id === clipId);
+    const clip = deck.clips.find((c: any) => c.id === clipId);
     if (clip) {
       await this.storageService.deleteClip(clip);
     }
@@ -171,7 +176,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   private async _togglePin(clipId: string) {
     const deck = await this.storageService.loadDeck();
-      const clip = deck.clips.find((c: any) => c.id === clipId);
+    const clip = deck.clips.find((c: any) => c.id === clipId);
     if (clip) {
       clip.pinned = !clip.pinned;
       await this.storageService.saveDeck(deck);
@@ -179,28 +184,99 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   }
 
   private async _reorderClips(startIndex: number, endIndex: number) {
-    const deck = await this.storageService.loadDeck();
-    deck.clips = DnDService.reorderClips(deck.clips, startIndex, endIndex);
-    await this.storageService.saveDeck(deck);
+    try {
+      const deck = await this.storageService.loadDeck();
+      const originalClips = [...deck.clips];
+      const newClips = DnDService.reorderClips(deck.clips, startIndex, endIndex);
+      
+      // 如果返回的是原来的clips（比如参数无效），则不保存
+      if (newClips === originalClips) {
+        console.log('Reorder of pinned clips skipped: invalid indices or no change');
+        return;
+      }
+      
+      deck.clips = newClips;
+      await this.storageService.saveDeck(deck);
+      console.log(`Reordered pinned clips: moved from ${startIndex} to ${endIndex}`);
+    } catch (error) {
+      console.error('Failed to reorder pinned clips:', error);
+      vscode.window.showErrorMessage(`Failed to reorder pinned clips: ${error instanceof Error ? error.message : error}. The deck state has been restored.`);
+      // 重新加载deck，确保前端状态与存储一致
+      await this._refreshDeck();
+    }
+  }
+
+  private async _reorderRecentClips(clipType: string, startIndex: number, endIndex: number) {
+    try {
+      const deck = await this.storageService.loadDeck();
+      
+      // 該当タイプの未ピン留めクリップの実際のインデックスを収集
+      const targetIndices: number[] = [];
+      deck.clips.forEach((clip, index) => {
+        if (clip.type === clipType && !clip.pinned) {
+          targetIndices.push(index);
+        }
+      });
+      
+      if (targetIndices.length === 0) {
+        console.log(`No clips of type ${clipType} to reorder`);
+        return;
+      }
+      
+      // 境界値チェック
+      if (startIndex < 0 || startIndex >= targetIndices.length ||
+          endIndex < 0 || endIndex >= targetIndices.length) {
+        console.error('Invalid reorder indices for recent clips:', { startIndex, endIndex, length: targetIndices.length });
+        return;
+      }
+      
+      // 実際のインデックスを取得
+      const actualStartIndex = targetIndices[startIndex];
+      const actualEndIndex = targetIndices[endIndex];
+      
+      // クリップを移動
+      const [movedClip] = deck.clips.splice(actualStartIndex, 1);
+      
+      // ターゲットインデックスを調整（元の開始インデックスが終了インデックスより小さい場合、削除によりインデックスがずれる）
+      let adjustedEndIndex = actualEndIndex;
+      if (actualStartIndex < actualEndIndex) {
+        adjustedEndIndex -= 1;
+      }
+      
+      deck.clips.splice(adjustedEndIndex, 0, movedClip);
+      
+      // 該当タイプの未ピン留めクリップのorderのみ更新
+      let order = 0;
+      deck.clips.forEach((clip) => {
+        if (clip.type === clipType && !clip.pinned) {
+          clip.order = order++;
+        }
+      });
+      
+      await this.storageService.saveDeck(deck);
+      console.log(`Reordered recent clips of type ${clipType}: moved from ${startIndex} to ${endIndex}`);
+    } catch (error) {
+      console.error('Failed to reorder recent clips:', error);
+      vscode.window.showErrorMessage(`Failed to reorder clips: ${error}`);
+    }
   }
 
   private async _jumpToCell(notebookUri: string, cellId: string): Promise<void> {
     try {
       const uri = vscode.Uri.parse(notebookUri);
       const document = await vscode.workspace.openTextDocument(uri);
-      // Check if it's a marimo file
       if (document.languageId === 'python' && 
           (document.getText().includes('import marimo') || document.getText().includes('from marimo'))) {
         const marimoAdapter = new MarimoAdapter();
         await marimoAdapter.jumpToCell(notebookUri, cellId);
       } else {
-        // Assume native notebook
         const nativeAdapter = new NativeNotebookAdapter();
         await nativeAdapter.jumpToCell(notebookUri, cellId);
       }
     } catch (error) {
       vscode.window.showErrorMessage(`Failed to jump to cell: ${error}`);
     }
+    return Promise.resolve();
   }
 
   private async _openImageInNewWindow(clip: any) {
@@ -208,11 +284,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       return;
     }
 
-    // 新しいWebviewパネルを作成
     const panel = vscode.window.createWebviewPanel(
       'imagePreview',
       clip.title || 'Image Preview',
-      vscode.ViewColumn.Beside, // 現在のエディタの横に開く
+      vscode.ViewColumn.Beside,
       {
         enableScripts: false,
         retainContextWhenHidden: true,
@@ -223,21 +298,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       }
     );
 
-    // 画像のURIを取得（クリップのimagePathから）
     let imageUri: vscode.Uri;
     try {
-      // クリップのimagePathは元のファイル名（パス）なので、ストレージからURIを取得
       imageUri = this.storageService.getImageUri(clip.content.imagePath);
     } catch (error) {
       console.error('Failed to get image URI:', error);
-      // フォールバック: imagePathをそのままURIとして使用
       imageUri = vscode.Uri.parse(clip.content.imagePath);
     }
 
-    // Webviewパネル内で画像を全画面表示するHTML
     panel.webview.html = `
       <!DOCTYPE html>
-      <html lang="ja">
+      <html lang="en">
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -269,16 +340,113 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       </head>
       <body>
         <div class="image-container">
-          <img src="${panel.webview.asWebviewUri(imageUri)}" alt="${clip.title || 'Image'}" />
+          <img src="${panel.webview.asWebviewUri(imageUri)}" alt="${clip.title || 'Image'}">
         </div>
       </body>
       </html>
     `;
 
-    // パネルが閉じられた時の処理
     panel.onDidDispose(() => {
-      // クリーンアップが必要な場合はここに記述
+      // Cleanup if needed
     });
+  }
+
+  private async _openClip(clip: any) {
+    if (!clip) {
+      console.log('Expand: No clip provided for expansion');
+      return;
+    }
+    console.log(`Expand: Attempting to open clip ${clip.id} (type: ${clip.type}, title: ${clip.title || 'untitled'})`);
+    switch (clip.type) {
+      case 'image':
+        console.log('Expand: Opening image clip');
+        await this._openImageInNewWindow(clip);
+        break;
+      case 'html':
+        console.log('Expand: Opening HTML clip');
+        await this._openHtmlClip(clip);
+        break;
+      case 'dataframe':
+      case 'text':
+        console.log('Expand: Opening text/dataframe clip');
+        await this._openTextClip(clip);
+        break;
+      default:
+        const errorMsg = `Unsupported clip type for expansion: ${clip.type}`;
+        console.error(errorMsg);
+        vscode.window.showErrorMessage(errorMsg);
+    }
+  }
+
+  private async _openHtmlClip(clip: any) {
+    const panel = vscode.window.createWebviewPanel(
+      'clipPreview',
+      clip.title || 'HTML Preview',
+      vscode.ViewColumn.Beside,
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true,
+        localResourceRoots: [this._extensionUri]
+      }
+    );
+
+    panel.webview.html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${clip.title || 'HTML Preview'}</title>
+        <style>
+          body { margin: 0; padding: 16px; background-color: #1e1e1e; color: #d4d4d4; }
+          .content { max-width: 100%; overflow: auto; }
+        </style>
+      </head>
+      <body>
+        <div class="content">${clip.content.htmlContent || ''}</div>
+      </body>
+      </html>
+    `;
+  }
+
+  private async _openTextClip(clip: any) {
+    const panel = vscode.window.createWebviewPanel(
+      'clipPreview',
+      clip.title || 'Text Preview',
+      vscode.ViewColumn.Beside,
+      {
+        enableScripts: false,
+        retainContextWhenHidden: true
+      }
+    );
+
+    const content = clip.content.textContent || clip.content.htmlContent || 'No content';
+    panel.webview.html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${clip.title || 'Text Preview'}</title>
+        <style>
+          body { margin: 0; padding: 16px; background-color: #1e1e1e; color: #d4d4d4; font-family: monospace; }
+          pre { white-space: pre-wrap; word-wrap: break-word; }
+        </style>
+      </head>
+      <body>
+        <pre>${this._escapeHtml(content)}</pre>
+      </body>
+      </html>
+    `;
+  }
+
+  private _escapeHtml(text: string): string {
+    return text
+      .replace(/&/g, '&')
+      .replace(/</g, '<')
+      .replace(/>/g, '>')
+      .replace(/"/g, '"')
+      .replace(/'/g, '&#039;');
   }
 
   private _getHtmlForWebview(webview: vscode.Webview): string {
@@ -293,7 +461,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     );
 
     const nonce = getNonce();
-    // 最小限のCSP - 問題の切り分けのため
     return `<!DOCTYPE html>
       <html lang="en">
       <head>

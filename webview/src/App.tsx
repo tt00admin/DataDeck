@@ -96,9 +96,21 @@ function App() {
     }
   }, []);
 
+  const handleReorderRecent = useCallback((type: string, startIndex: number, endIndex: number) => {
+    if (window.vscode) {
+      window.vscode.postMessage({ type: 'reorderRecentClips', clipType: type, startIndex, endIndex });
+    }
+  }, []);
+
   const handleOpenImage = useCallback((clip: Clip) => {
     if (window.vscode) {
       window.vscode.postMessage({ type: 'openImage', clip });
+    }
+  }, []);
+
+  const handleOpenClip = useCallback((clip: Clip) => {
+    if (window.vscode) {
+      window.vscode.postMessage({ type: 'openClip', clip });
     }
   }, []);
 
@@ -180,6 +192,8 @@ function App() {
         onTogglePin={handleTogglePin}
         onReorder={handleReorder}
         onOpenImage={handleOpenImage}
+        onOpenClip={handleOpenClip}
+        onReorderRecent={handleReorderRecent}
       />
     </div>
   );

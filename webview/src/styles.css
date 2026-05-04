@@ -208,16 +208,16 @@ h1 {
 .carousel {
   display: flex;
   overflow-x: auto;
-  gap: 10px;
+  gap: 12px;
   padding-bottom: 8px;
   scroll-snap-type: x mandatory;
 }
 
-/* Carousel item - compact preview size */
+/* Carousel item - fixed size for all types */
 .carousel-item {
-  flex: 0 0 200px;
+  flex: 0 0 220px;
   scroll-snap-align: start;
-  max-height: 220px;
+  height: 240px;
   overflow: hidden;
 }
 
@@ -227,14 +227,32 @@ h1 {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: 6px;
+  padding: 8px;
+}
+
+/* Drag handle styling */
+.drag-handle {
+  cursor: grab;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.drag-handle:hover {
+  background-color: var(--vscode-toolbar-hoverBackground, rgba(255,255,255,0.1));
+}
+
+.drag-handle:active {
+  cursor: grabbing;
 }
 
 /* Clip content area - compact preview */
 .carousel-item .clip-content {
-  max-height: 130px;
+  flex: 1;
   overflow: hidden;
-  flex-shrink: 0;
+  margin-top: 6px;
 }
 
 /* Show scrollbar on hover for content */
@@ -242,20 +260,28 @@ h1 {
   overflow: auto;
 }
 
-/* Image sizing for carousel preview - more compact */
+/* Image sizing for carousel preview */
+.carousel-item .clip-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-height: 140px;
+  overflow: hidden;
+}
+
 .carousel-item .clip-image-container img {
   max-width: 100%;
-  max-height: 100px;
+  max-height: 140px;
   width: auto;
   height: auto;
   object-fit: contain;
 }
 
-/* Clip title in carousel - smaller and truncated */
+/* Clip title in carousel */
 .carousel-item .clip-title {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.2;
-  margin-top: 4px;
+  margin-top: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -263,9 +289,10 @@ h1 {
 
 /* Truncate text content in carousel preview */
 .carousel-item .clip-content pre {
-  max-height: 100px;
+  max-height: 120px;
   overflow: hidden;
   font-size: 11px;
+  margin: 0;
 }
 
 /* Hide less important elements in carousel preview */
@@ -280,6 +307,7 @@ h1 {
 .carousel-item .clip-card:hover .clip-tags,
 .carousel-item .clip-card:hover .clip-footer {
   display: block;
+  margin-top: 4px;
 }
 
 /* Hide actions by default in carousel, show on hover */
@@ -307,6 +335,7 @@ h1 {
 .carousel-section {
   display: grid;
   gap: 8px;
+  margin-bottom: 12px;
 }
 
 .carousel-type-header {
@@ -316,12 +345,6 @@ h1 {
   color: var(--vscode-foreground);
   padding-bottom: 4px;
   border-bottom: 1px solid var(--vscode-panel-border);
-}
-
-/* Ensure each clip card aligns nicely within the carousel */
-.carousel-item {
-  flex: 0 0 auto;
-  scroll-snap-align: start;
 }
 
 .deck-section {
@@ -407,13 +430,17 @@ h1 {
 
 .clip-actions {
   display: flex;
-  gap: 6px;
+  gap: 4px;
 }
 
-.clip-actions button {
+.clip-actions .icon-button {
   min-height: 24px;
-  padding: 2px 7px;
-  font-size: 11px;
+  min-width: 24px;
+  padding: 4px;
+}
+
+.clip-actions .icon-button .codicon {
+  font-size: 16px;
 }
 
 .clip-title {
@@ -478,10 +505,17 @@ h1 {
   top: 6px;
   right: 6px;
   min-height: 24px;
-  padding: 2px 7px;
+  min-width: 24px;
+  padding: 4px;
   color: var(--vscode-button-foreground);
   background: var(--vscode-button-background);
-  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-expand-button .codicon {
+  font-size: 16px;
 }
 
 .image-dimensions {

@@ -1,14 +1,25 @@
 import React from 'react';
 import { Clip } from '../../../src/types';
 
+// VS Code APIの型定義
+declare global {
+  interface Window {
+    vscode: {
+      postMessage: (message: any) => void;
+    } | undefined;
+  }
+}
+
 interface ClipCardProps {
   clip: Clip;
   onDelete: (clipId: string) => void;
   onTogglePin: (clipId: string) => void;
   onOpenImage?: (clip: Clip) => void;
+  onOpenClip?: (clip: Clip) => void;
+  isCarousel?: boolean;
 }
 
-function ClipCard({ clip, onDelete, onTogglePin, onOpenImage }: ClipCardProps) {
+function ClipCard({ clip, onDelete, onTogglePin, onOpenImage, onOpenClip, isCarousel }: ClipCardProps) {
   const formatDate = (timestamp: number) => {
     return new Intl.DateTimeFormat(undefined, {
       month: 'short',
@@ -21,29 +32,27 @@ function ClipCard({ clip, onDelete, onTogglePin, onOpenImage }: ClipCardProps) {
   const renderContent = () => {
     switch (clip.type) {
       case 'image':
-        if (clip.content.imagePath) {
+        if (clip.content.imageWebviewUri) {
           return (
             <div className="clip-image-container">
-              <img 
-                src={clip.content.imageWebviewUri || clip.content.imagePath} 
+              <img
+                src={clip.content.imageWebviewUri}
                 alt={clip.title || 'clip image'}
                 loading="lazy"
                 style={{ maxWidth: '100%', height: 'auto' }}
               />
-              <button
-                className="image-expand-button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onOpenImage?.(clip);
-                }}
-              >
-                Expand
-              </button>
-              {clip.metadata?.dimensions?.width && clip.metadata?.dimensions?.height && (
-                <span className="image-dimensions">
-                  {clip.metadata.dimensions.width} x {clip.metadata.dimensions.height}
-                </span>
-              )}
+            </div>
+          );
+        }
+        if (clip.content.imagePath) {
+          return (
+            <div className="clip-image-container">
+              <img
+                src={clip.content.imagePath}
+                alt={clip.title || 'clip image'}
+                loading="lazy"
+                style={{ maxWidth: '100%', height: 'auto' }}
+              />
             </div>
           );
         }
@@ -71,18 +80,39 @@ function ClipCard({ clip, onDelete, onTogglePin, onOpenImage }: ClipCardProps) {
   return (
     <div className={`clip-card ${clip.pinned ? 'pinned' : ''}`} onClick={handleClick}>
       <div className="clip-header">
-        <span className="clip-type">{clip.type}</span>
+        <span className="drag-handle" style={{ cursor: 'grab', marginRight: '4px', fontSize: '14px' }}>☰</span>
+        {!isCarousel && <span className="clip-type">{clip.type}</span>}
         <div className="clip-actions">
-          <button onClick={(event) => {
-            event.stopPropagation();
-            onTogglePin(clip.id);
-          }}>
-            {clip.pinned ? 'Unpin' : 'Pin'}
+          <button
+            className="icon-button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onTogglePin(clip.id);
+            }}
+            title={clip.pinned ? 'Unpin' : 'Pin'}
+          >
+            <span className={`codicon ${clip.pinned ? 'codicon-pinned' : 'codicon-pin'}`}></span>
           </button>
-          <button onClick={(event) => {
-            event.stopPropagation();
-            onDelete(clip.id);
-          }}>Delete</button>
+          <button
+            className="icon-button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onDelete(clip.id);
+            }}
+            title="Delete"
+          >
+            <span className="codicon codicon-trash"></span>
+          </button>
+          <button
+            className="icon-button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onOpenClip?.(clip);
+            }}
+            title="Expand"
+          >
+            <span className="codicon codicon-unfold"></span>
+          </button>
         </div>
       </div>
       
