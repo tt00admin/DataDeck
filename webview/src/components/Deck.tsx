@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import ClipCard from './ClipCard';
 import { Clip } from '../../../src/types';
 
@@ -23,6 +23,18 @@ function Deck({ clips, onDelete, onTogglePin, onReorder, onOpenImage, onOpenClip
   // For pinned clips drag-and-drop
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
+  
+  // For auto-scrolling carousel to left on new clip
+  const carouselRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  
+  // Scroll carousel to left when clips change (new clip added)
+  useEffect(() => {
+    Object.values(carouselRefs.current).forEach((carousel) => {
+      if (carousel) {
+        carousel.scrollLeft = 0;
+      }
+    });
+  }, [clips]);
 
   const handleDragStart = useCallback((index: number) => {
     dragItem.current = index;
@@ -140,7 +152,7 @@ function Deck({ clips, onDelete, onTogglePin, onReorder, onOpenImage, onOpenClip
           {Object.entries(groupedByType).map(([type, typeClips]) => (
             <div key={type} className="carousel-section">
               <h3 className="carousel-type-header">{typeLabels[type] || type} ({typeClips.length})</h3>
-              <div className="carousel">
+              <div className="carousel" ref={(el) => { carouselRefs.current[type] = el; }}>
                 {typeClips.map((clip, index) => (
                   <div
                     key={clip.id}
