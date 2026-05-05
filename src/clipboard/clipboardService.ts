@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { NotebookAdapter } from '../notebook/notebookAdapter.js';
 import { MarimoAdapter } from '../notebook/marimoAdapter.js';
 import { INotebookAdapter } from '../notebook/notebookAdapter.js';
+import { escapeHtml } from '../utils/htmlEscape.js';
 
 export class ClipboardService {
   private notebookAdapter: INotebookAdapter;
@@ -269,29 +270,21 @@ export class ClipboardService {
         : Object.keys(rows[0] ?? {}).filter((name) => name !== 'index');
 
       if (columns.length === 0) {
-        return `<pre>${this.escapeHtml(JSON.stringify(parsed, null, 2))}</pre>`;
+        return `<pre>${escapeHtml(JSON.stringify(parsed, null, 2))}</pre>`;
       }
 
-      const header = columns.map((column: string) => `<th>${this.escapeHtml(column)}</th>`).join('');
+      const header = columns.map((column: string) => `<th>${escapeHtml(column)}</th>`).join('');
       const body = rows.map((row: any) => {
-        const cells = columns.map((column: string) => `<td>${this.escapeHtml(String(row[column] ?? ''))}</td>`).join('');
+        const cells = columns.map((column: string) => `<td>${escapeHtml(String(row[column] ?? ''))}</td>`).join('');
         return `<tr>${cells}</tr>`;
       }).join('');
 
       return `<table class="datadeck-table"><thead><tr>${header}</tr></thead><tbody>${body}</tbody></table>`;
     } catch {
-      return `<pre>${this.escapeHtml(json)}</pre>`;
+      return `<pre>${escapeHtml(json)}</pre>`;
     }
   }
 
-  private escapeHtml(value: string): string {
-    return value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
 
   private associateCode(cell: vscode.NotebookCell): string | undefined {
     return cell.document?.getText();

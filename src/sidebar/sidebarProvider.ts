@@ -1,7 +1,8 @@
+import { escapeHtml } from '../utils/htmlEscape.js';
 import * as vscode from 'vscode';
 import { StorageService } from '../storage/storageService.js';
 import { ClipboardService } from '../clipboard/clipboardService.js';
-import { NativeNotebookAdapter } from '../notebook/nativeNotebook.js';
+import { NotebookAdapter } from '../notebook/notebookAdapter.js';
 import { MarimoAdapter } from '../notebook/marimoAdapter.js';
 import { SearchService } from '../search/searchService.js';
 import { DnDService } from '../sidebar/components/dndService.js';
@@ -210,7 +211,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       const originalClips = [...deck.clips];
       const newClips = DnDService.reorderClips(deck.clips, startIndex, endIndex);
       
-      // 如果返回的是原来的clips（比如参数无效），则不保存
+      // パラメータが無効な場合、元のclipsを返すため保存しない
       if (newClips === originalClips) {
         console.log('Reorder of pinned clips skipped: invalid indices or no change');
         return;
@@ -222,7 +223,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     } catch (error) {
       console.error('Failed to reorder pinned clips:', error);
       vscode.window.showErrorMessage(`Failed to reorder pinned clips: ${error instanceof Error ? error.message : error}. The deck state has been restored.`);
-      // 重新加载deck，确保前端状态与存储一致
+      // deckを再読み込みして、前端の状態とストレージを一致させる
       await this._refreshDeck();
     }
   }
@@ -286,13 +287,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     try {
       const uri = vscode.Uri.parse(notebookUri);
       const document = await vscode.workspace.openTextDocument(uri);
-      if (document.languageId === 'python' && 
+      if (document.languageId === 'python' &&
           (document.getText().includes('import marimo') || document.getText().includes('from marimo'))) {
         const marimoAdapter = new MarimoAdapter();
         await marimoAdapter.jumpToCell(notebookUri, cellId);
       } else {
-        const nativeAdapter = new NativeNotebookAdapter();
-        await nativeAdapter.jumpToCell(notebookUri, cellId);
+        const notebookAdapter = new NotebookAdapter();
+        await notebookAdapter.jumpToCell(notebookUri, cellId);
       }
     } catch (error) {
       vscode.window.showErrorMessage(`Failed to jump to cell: ${error}`);
@@ -455,20 +456,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         </style>
       </head>
       <body>
-        <pre>${this._escapeHtml(content)}</pre>
+        <pre>${escapeHtml(content)}</pre>
       </body>
       </html>
     `;
   }
 
-  private _escapeHtml(text: string): string {
-    return text
-      .replace(/&/g, '&')
-      .replace(/</g, '<')
-      .replace(/>/g, '>')
-      .replace(/"/g, '"')
-      .replace(/'/g, '&#039;');
-  }
 
   private _getHtmlForWebview(webview: vscode.Webview): string {
     const scriptUri = webview.asWebviewUri(

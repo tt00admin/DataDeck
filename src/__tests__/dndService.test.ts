@@ -18,17 +18,17 @@ function createMockClip(id: string, pinned: boolean, order: number, type: string
 }
 
 describe('DnDService.reorderClips', () => {
-  // 测试1: 没有pinned clips时，返回原数组
+  // テスト1: pinned clipsがない場合、元の配列を返す
   test('should return original clips when no pinned clips exist', () => {
     const clips = [
       createMockClip('1', false, 0),
       createMockClip('2', false, 1),
     ];
     const result = DnDService.reorderClips(clips, 0, 1);
-    expect(result).toBe(clips); // 应该返回原数组（没有变化）
+    expect(result).toBe(clips); // 元の配列を返す（変更なし）
   });
 
-  // 测试2: 有pinned clips，有效索引，正确移动
+  // テスト2: pinned clipsがあり有効なインデックスで正しく移動
   test('should reorder pinned clips correctly with valid indices', () => {
     const clips = [
       createMockClip('p1', true, 0),
@@ -39,24 +39,24 @@ describe('DnDService.reorderClips', () => {
     // 将p1（index 0）移动到index 2
     const result = DnDService.reorderClips(clips, 0, 2);
     
-    // 检查pinned clips的顺序
+    // pinned clipsの順序を確認
     const pinnedResult = result.filter(c => c.pinned);
     expect(pinnedResult[0].id).toBe('p2');
     expect(pinnedResult[1].id).toBe('p3');
     expect(pinnedResult[2].id).toBe('p1');
     
-    // 检查order是否更新
+    // orderが更新されたか確認
     expect(pinnedResult[0].order).toBe(0);
     expect(pinnedResult[1].order).toBe(1);
     expect(pinnedResult[2].order).toBe(2);
     
-    // 检查unpinned clips是否保持不变
+    // unpinned clipsが変更されていないか確認
     const unpinnedResult = result.filter(c => !c.pinned);
     expect(unpinnedResult[0].id).toBe('u1');
-    expect(unpinnedResult[0].order).toBe(3); // order应该保持原样
+    expect(unpinnedResult[0].order).toBe(3); // orderは元のまま保持されるべき
   });
 
-  // 测试3: 无效startIndex（负数），返回原数组
+  // テスト3: startIndexが無効（負数）の場合、元の配列を返す
   test('should return original clips when startIndex is negative', () => {
     const clips = [
       createMockClip('p1', true, 0),
@@ -66,24 +66,24 @@ describe('DnDService.reorderClips', () => {
     expect(result).toBe(clips);
   });
 
-  // 测试4: 无效endIndex（超出范围），返回原数组
+  // テスト4: endIndexが無効（範囲外）の場合、元の配列を返す
   test('should return original clips when endIndex is out of range', () => {
     const clips = [
       createMockClip('p1', true, 0),
       createMockClip('p2', true, 1),
     ];
-    const result = DnDService.reorderClips(clips, 0, 2); // endIndex=2超出范围（只有2个pinned clips，索引0-1）
+    const result = DnDService.reorderClips(clips, 0, 2); // endIndex=2は範囲外（pinned clipsは2つ、インデックス0-1）
     expect(result).toBe(clips);
   });
 
-  // 测试5: 移动到第一个位置
+  // テスト5: 最初の位置に移動
   test('should move clip to first position', () => {
     const clips = [
       createMockClip('p1', true, 0),
       createMockClip('p2', true, 1),
       createMockClip('p3', true, 2),
     ];
-    const result = DnDService.reorderClips(clips, 2, 0); // 将p3移动到第一个位置
+    const result = DnDService.reorderClips(clips, 2, 0); // p3を最初の位置に移動する
     
     const pinnedResult = result.filter(c => c.pinned);
     expect(pinnedResult[0].id).toBe('p3');
@@ -102,7 +102,7 @@ describe('DnDService.reorderClips', () => {
     const originalU1Order = clips[1].order;
     const originalU2Order = clips[3].order;
     
-    const result = DnDService.reorderClips(clips, 0, 1); // 移动p1到p2的位置
+    const result = DnDService.reorderClips(clips, 0, 1); // p1をp2の位置に移動する
     
     const u1 = result.find(c => c.id === 'u1');
     const u2 = result.find(c => c.id === 'u2');
