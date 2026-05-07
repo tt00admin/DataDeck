@@ -9,6 +9,13 @@
 
 ## 📸 スクリーンショット
 
+> ⚠️ **スクリーンショットは手動で追加してください**
+>
+> 以下の画像ファイルを `docs/images/` ディレクトリに追加してください:
+> - `main-screen.png` - メイン画面キャプチャ (1280x720px以上)
+> - `clip-save-demo.gif` - クリップ保存のデモGIF (5-10秒)
+> - `search-filter-demo.gif` - 検索・フィルタリングのデモGIF
+
 ### メイン画面
 ![DataDeck メイン画面](docs/images/main-screen.png)
 *サイドバーでのクリップ管理画面*
@@ -20,10 +27,6 @@
 ### 検索・フィルタリング
 ![検索・フィルタリング](docs/images/search-filter-demo.gif)
 *タグや日付でクリップを絞り込み*
-
-### Markdownエクスポート
-![Markdownエクスポート](docs/images/export-demo.gif)
-*保存したクリップからMarkdownレポートを生成*
 
 
 ## 概要

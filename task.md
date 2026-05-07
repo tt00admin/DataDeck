@@ -191,13 +191,20 @@
 - [ ] リリースノートの作成（GitHub Releases）
 
 ### 13.6 ドキュメント・プロモーション
-- [ ] CHANGELOG.mdの作成・更新
-- [ ] CONTRIBUTING.mdの作成
+- [x] CHANGELOG.mdの作成・更新
+- [x] CONTRIBUTING.mdの作成
 - [ ] デモ動画のYouTubeアップロード（任意）
 - [ ] SNSでの告知準備（Twitter/X, LinkedIn等）
 
 ## 14. 公開準備チェックリスト
 - [x] package.jsonの全メタデータが正しい
+- [x] CHANGELOG.mdの作成
+- [x] CONTRIBUTING.mdの作成
+- [x] package.jsonにbuild/package/publishスクリプト追加
+- [ ] スクリーンショット/デモGIFの手動作成・配置
+- [ ] 最終ビルド・手動テスト
+- [ ] vsixパッケージ生成
+- [ ] Marketplace公開
 - [x] README.mdがMarketplace向けに最適化されている（スクリーンショットは要手動追加）
 - [ ] スクリーンショット・デモGIFが準備されている ← **手動作業が必要**
 - [x] 全テストが通過している（`npm test`: 8テスト成功）

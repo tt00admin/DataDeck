@@ -101,7 +101,10 @@
     "webpack:prod": "webpack --mode production",
     "webview:dev": "cd webview && npm run dev",
     "webview:build": "cd webview && npm run build",
-    "test": "jest"
+    "test": "jest",
+    "build": "npm run compile && npm run webview:build",
+    "package": "npm run build && npx vsce package",
+    "publish": "npm run build && npx vsce publish"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
