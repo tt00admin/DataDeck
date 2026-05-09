@@ -14,3 +14,6 @@ out/__mocks__/**
 task.md
 要件.md
 設計.md
+plans/**
+jest.config.js
+.vscode/datadeck/**

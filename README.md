@@ -20,7 +20,6 @@
 ![DataDeck メイン画面](docs/images/main-screen.png)
 *サイドバーでのクリップ管理画面*
 
-<!--
 ### クリップ保存
 ![クリップ保存のデモ](docs/images/clip-save-demo.gif)
 *ショートカットキーでクリップを保存*
@@ -28,7 +27,6 @@
 ### 検索・フィルタリング
 ![検索・フィルタリング](docs/images/search-filter-demo.gif)
 *タグや日付でクリップを絞り込み*
--->
 
 
 ## 概要

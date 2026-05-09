@@ -32,3 +32,9 @@ Thumbs.db
 
 # Trash (discarded files)
 trash/
+
+# Plans and documentation (internal)
+plans/
+
+# Test configuration
+jest.config.js
