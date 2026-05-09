@@ -1,10 +1,10 @@
 {
-  "name": "datadeck",
+  "name": "tt-datadeck",
   "type": "module",
-  "displayName": "DataDeck for VS Code",
+  "displayName": "DataDeck",
   "description": "データサイエンティストの試行錯誤過程を支援するクリップボード型成果物管理システム",
   "version": "1.0.2",
-  "publisher": "datadeck",
+  "publisher": "tt00",
   "license": "MIT",
   "keywords": [
     "data-science",
@@ -46,7 +46,7 @@
         {
           "id": "datadeck",
           "title": "DataDeck",
-          "icon": "resources/icon.svg"
+          "icon": "docs/images/DataDeck-icon.png"
         }
       ]
     },
