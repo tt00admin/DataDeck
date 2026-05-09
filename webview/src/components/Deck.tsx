@@ -52,7 +52,7 @@ function Deck({ clips, onDelete, onTogglePin, onReorder, onOpenImage, onOpenClip
     dragOverItem.current = null;
   }, [onReorder]);
 
-  const getDeckIndex = (clipId: string) => clips.findIndex((item) => item.id === clipId);
+  const getPinnedIndex = (clipId: string) => pinnedClips.findIndex((item) => item.id === clipId);
 
   // For carousel items drag-and-drop
   const [carouselDragState, setCarouselDragState] = useState<{
@@ -96,13 +96,13 @@ function Deck({ clips, onDelete, onTogglePin, onReorder, onOpenImage, onOpenClip
             </div>
           )}
           {clipList.map((clip) => {
-            const deckIndex = getDeckIndex(clip.id);
+            const pinnedIndex = getPinnedIndex(clip.id);
             return (
               <div
                 key={clip.id}
                 draggable
-                onDragStart={() => handleDragStart(deckIndex)}
-                onDragEnter={() => handleDragEnter(deckIndex)}
+                onDragStart={() => handleDragStart(pinnedIndex)}
+                onDragEnter={() => handleDragEnter(pinnedIndex)}
                 onDragEnd={handleDragEnd}
                 onDragOver={(e) => e.preventDefault()}
                 style={{ cursor: 'grab' }}

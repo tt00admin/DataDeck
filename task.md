@@ -26,7 +26,6 @@
   - [x] 画像のサイズ・寸法メタデータの保存
 - [x] NotebookAdapterの実装
   - [x] VS Code Native Notebook API対応 (`nativeNotebook.ts`)
-  - [x] marimo対応の統合（marimoAdapter.ts実装済み、sidebarProvider.tsでアダプター切り替え実装済み）
   - [x] 抽象化レイヤー (`notebookAdapter.ts`)
 
 ## 4. フェーズ3: UI実装
@@ -106,9 +105,6 @@
   - [x] ファイル名（ソースNotebook）でのフィルタリング実装（App.tsx + searchService.ts）
 - [x] Markdownエクスポート機能の完全実装
   - 要件3.4: 選択した成果物とメモをまとめたレポート下書き出力（実装済み）
-- [x] marimo対応の統合
-  - 要件互換性: marimoのセル出力・スクリプト構造への対応（marimoAdapter.ts実装済み、基本的な対応完了）
-  - [ ] より高度なmarimo統合（AST解析等）は今後の拡張として予約
 - [x] 非機能要件の実現
   - [x] 画像の遅延読み込み（ClipCardでloading="lazy"実装済み）
   - [ ] Web Workerでの画像圧縮処理（imageWorker.tsは作成済みだが統合は今後の拡張）
@@ -122,7 +118,7 @@
 - [x] 非機能要件の主要部分を満たしている（パフォーマンス、ポータビリティ、互換性）
 - [x] UIの主要部分を実装済み（Activity Bar、Side Bar、Pinned/Recentセクション）
 - [ ] オプション機能（Floating Action Button、セル出力のAdd to Deckボタン）は未実装だが、要件ではOptionalのため、主要要件に影響しない
-- [ ] 拡張機能（Web Worker画像圧縮、高度なmarimo統合）は今後の拡張として予約
+- [ ] 拡張機能（Web Worker画像圧縮）は今後の拡張として予約
 
 ## 12. 実装完了サマリー
 ### 達成された主要機能
@@ -134,8 +130,7 @@
 6. **ドラッグ＆ドロップ**: 表示順序の入れ替え
 7. **フィルタリング**: ファイル名・タグ・保存日時・出力タイプでの絞り込み
 8. **Markdown出力**: 選択した成果物とメモをまとめたレポート下書き出力
-9. **marimo対応**: 基本的なmarimo統合完了
-10. **.gitignore推奨**: 初期化時の自動推奨設定
+9. **.gitignore推奨**: 初期化時の自動推奨設定
 
 ### 技術的成果
 - TypeScriptコンパイルエラー解消済み
@@ -173,7 +168,6 @@
 ### 13.4 最終テスト・品質保証
 - [ ] 全機能の手動テスト
   - [ ] Jupyter Notebookでの動作確認
-  - [ ] marimoでの動作確認
   - [ ] 各種出力タイプ（画像、HTML、DataFrame、テキスト）の保存確認
   - [ ] エラーハンドリングの確認
 - [ ] クロスプラットフォームテスト（Windows/Mac/Linux）

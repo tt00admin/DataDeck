@@ -3,7 +3,6 @@ import { StorageService } from '../storage/storageService.js';
 import { Clip } from '../types/index.js';
 import { v4 as uuidv4 } from 'uuid';
 import { NotebookAdapter } from '../notebook/notebookAdapter.js';
-import { MarimoAdapter } from '../notebook/marimoAdapter.js';
 import { INotebookAdapter } from '../notebook/notebookAdapter.js';
 import { MimeTypeDetector } from './mimeTypeDetector.js';
 import { ImageAnalyzer } from './imageAnalyzer.js';
@@ -11,7 +10,6 @@ import { HtmlGenerator } from './htmlGenerator.js';
 
 export class ClipboardService {
   private notebookAdapter: INotebookAdapter;
-  private marimoAdapter: INotebookAdapter;
   private mimeTypeDetector: MimeTypeDetector;
   private imageAnalyzer: ImageAnalyzer;
   private htmlGenerator: HtmlGenerator;
@@ -21,7 +19,6 @@ export class ClipboardService {
     private storageService: StorageService
   ) {
     this.notebookAdapter = new NotebookAdapter();
-    this.marimoAdapter = new MarimoAdapter();
     this.mimeTypeDetector = new MimeTypeDetector();
     this.imageAnalyzer = new ImageAnalyzer();
     this.htmlGenerator = new HtmlGenerator();
@@ -32,14 +29,8 @@ export class ClipboardService {
     let activeCell = cell ?? this.notebookAdapter.getActiveCell();
     let activeAdapter: INotebookAdapter = this.notebookAdapter;
 
-    // 標準ノートブックでない場合、marimoをチェック
-    if (!cell && !activeCell) {
-      activeCell = this.marimoAdapter.getActiveCell();
-      activeAdapter = this.marimoAdapter;
-    }
-
     if (!activeCell) {
-      vscode.window.showErrorMessage('No active notebook cell found. Please select a cell in a notebook or marimo file.');
+      vscode.window.showErrorMessage('No active notebook cell found. Please select a cell in a Jupyter notebook.');
       return;
     }
 
@@ -96,11 +87,10 @@ export class ClipboardService {
   }
 
   private async captureOutput(cell: vscode.NotebookCell, adapter: INotebookAdapter): Promise<Clip | undefined> {
-    // アダプターを使用して出力を取得（marimo等の特殊なケースに対応）
+    // Notebook APIから出力を取得
     const adapterOutput = adapter.getCellOutput(cell);
     
     // 標準 Notebook では stdout と display_data が別 output になるため、全 output を評価する。
-    // marimo 等で adapter からしか取得できない場合は adapter の output を fallback とする。
     const outputs = cell.outputs && cell.outputs.length > 0
       ? [...cell.outputs]
       : adapterOutput

@@ -111,4 +111,68 @@ describe('DnDService.reorderClips', () => {
   });
 });
 
-// 注意：_reorderRecentClips是SidebarProvider的私有方法，这里暂时不测试，后续可以通过集成测试验证
+describe('DnDService.reorderRecentClips', () => {
+  // テスト1: 特定のタイプのRecentクリップを正しく並び替え
+  test('should reorder recent clips of specific type correctly', () => {
+    const clips = [
+      createMockClip('p1', true, 0, 'text'),
+      createMockClip('img1', false, 1, 'image'),
+      createMockClip('img2', false, 2, 'image'),
+      createMockClip('img3', false, 3, 'image'),
+      createMockClip('text1', false, 4, 'text'),
+    ];
+    // img2（index 1）をimg3（index 3）の位置に移動
+    const result = DnDService.reorderRecentClips(clips, 'image', 1, 2);
+    
+    // imageタイプのみ並び替えられる
+    const imageClips = result.filter(c => c.type === 'image' && !c.pinned);
+    expect(imageClips[0].id).toBe('img1');
+    expect(imageClips[1].id).toBe('img3');
+    expect(imageClips[2].id).toBe('img2');
+    
+    // orderが更新されたか確認
+    expect(imageClips[0].order).toBe(0);
+    expect(imageClips[1].order).toBe(1);
+    expect(imageClips[2].order).toBe(2);
+    
+    // pinned clipsが変更されていないか確認
+    const pinnedResult = result.filter(c => c.pinned);
+    expect(pinnedResult[0].id).toBe('p1');
+  });
+
+  // テスト2: 無効なインデックスの場合、元の配列を返す
+  test('should return original clips when indices are invalid', () => {
+    const clips = [
+      createMockClip('img1', false, 0, 'image'),
+      createMockClip('img2', false, 1, 'image'),
+    ];
+    const result = DnDService.reorderRecentClips(clips, 'image', -1, 1);
+    expect(result).toBe(clips);
+  });
+
+  // テスト3: 指定タイプにクリップがない場合、元の配列を返す
+  test('should return original clips when no clips of specified type exist', () => {
+    const clips = [
+      createMockClip('p1', true, 0, 'text'),
+      createMockClip('text1', false, 1, 'text'),
+    ];
+    const result = DnDService.reorderRecentClips(clips, 'image', 0, 1);
+    expect(result).toBe(clips);
+  });
+
+  // テスト4: 最初の位置に移動
+  test('should move clip to first position', () => {
+    const clips = [
+      createMockClip('p1', true, 0, 'text'),
+      createMockClip('img1', false, 1, 'image'),
+      createMockClip('img2', false, 2, 'image'),
+      createMockClip('img3', false, 3, 'image'),
+    ];
+    const result = DnDService.reorderRecentClips(clips, 'image', 2, 0);
+    
+    const imageClips = result.filter(c => c.type === 'image' && !c.pinned);
+    expect(imageClips[0].id).toBe('img3');
+    expect(imageClips[1].id).toBe('img1');
+    expect(imageClips[2].id).toBe('img2');
+  });
+});

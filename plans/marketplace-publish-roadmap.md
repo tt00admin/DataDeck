@@ -65,7 +65,6 @@
    npm run package
    ```
    - Jupyter Notebookでの動作確認
-   - marimoでの動作確認
    - 各種出力タイプ（画像、HTML、DataFrame、テキスト）テスト
 
 3. **vsixパッケージ生成** (自動化済み)
@@ -124,7 +123,7 @@ npm run publish
 ### 公開前必須チェック (人要)
 - [ ] スクリーンショット/デモGIFの作成・配置
 - [ ] `npm run build` 成功確認
-- [ ] 手動テスト完了 (Jupyter/marimo)
+- [ ] 手動テスト完了 (Jupyter)
 - [ ] `npm run package` でvsix生成
 - [ ] 生成されたvsixでのインストール確認
 

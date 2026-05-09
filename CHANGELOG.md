@@ -11,7 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial stable release
 - Clipboard management system for data science workflows
 - Support for VS Code Native Notebook (Jupyter)
-- Support for marimo notebooks
 - Quick save with keyboard shortcut (Ctrl+Shift+D / Cmd+Shift+D)
 - Tag and memo support for clips
 - Pinning functionality for important clips

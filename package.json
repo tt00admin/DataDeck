@@ -11,7 +11,6 @@
     "notebook",
     "jupyter",
     "visualization",
-    "marimo",
     "clipboard",
     "productivity"
   ],
@@ -97,8 +96,6 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./tsconfig.json",
     "watch": "tsc -watch -p ./tsconfig.json",
-    "webpack": "webpack --mode development",
-    "webpack:prod": "webpack --mode production",
     "webview:dev": "cd webview && npm run dev",
     "webview:build": "cd webview && npm run build",
     "test": "jest",

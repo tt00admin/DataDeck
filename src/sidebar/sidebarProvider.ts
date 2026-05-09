@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { StorageService } from '../storage/storageService.js';
 import { ClipboardService } from '../clipboard/clipboardService.js';
 import { NotebookAdapter } from '../notebook/notebookAdapter.js';
-import { MarimoAdapter } from '../notebook/marimoAdapter.js';
 import { SearchService } from '../search/searchService.js';
 import { DnDService } from '../sidebar/components/dndService.js';
 import { MarkdownGenerator } from '../export/markdownGenerator.js';
@@ -318,16 +317,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   private async _jumpToCell(notebookUri: string, cellId: string): Promise<void> {
     try {
-      const uri = vscode.Uri.parse(notebookUri);
-      const document = await vscode.workspace.openTextDocument(uri);
-      if (document.languageId === 'python' &&
-          (document.getText().includes('import marimo') || document.getText().includes('from marimo'))) {
-        const marimoAdapter = new MarimoAdapter();
-        await marimoAdapter.jumpToCell(notebookUri, cellId);
-      } else {
-        const notebookAdapter = new NotebookAdapter();
-        await notebookAdapter.jumpToCell(notebookUri, cellId);
-      }
+      const notebookAdapter = new NotebookAdapter();
+      await notebookAdapter.jumpToCell(notebookUri, cellId);
     } catch (error) {
       vscode.window.showErrorMessage(`Failed to jump to cell: ${error}`);
     }

@@ -41,7 +41,7 @@ datadeck/
 │   ├── storage/            # Storage service for clips
 │   ├── search/             # Search and filter service
 │   ├── export/             # Markdown export
-│   ├── notebook/           # Notebook adapters (Native, marimo)
+│   ├── notebook/           # Notebook adapters (Native)
 │   └── types/              # TypeScript type definitions
 ├── webview/               # React webview UI
 │   ├── src/

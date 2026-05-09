@@ -47,4 +47,35 @@ export class DnDService {
   static deleteClip(clips: Clip[], clipId: string): Clip[] {
     return clips.filter((clip: Clip) => clip.id !== clipId);
   }
+
+  /**
+   * 指定タイプのRecentクリップを並び替え
+   */
+  static reorderRecentClips(clips: Clip[], type: string, startIndex: number, endIndex: number): Clip[] {
+    // 指定タイプの未ピン留めクリップを抽出
+    const typeClips = clips.filter(clip => !clip.pinned && clip.type === type);
+    const otherClips = clips.filter(clip => clip.pinned || clip.type !== type);
+    
+    // 境界値チェック
+    if (startIndex < 0 || startIndex >= typeClips.length ||
+        endIndex < 0 || endIndex >= typeClips.length) {
+      console.error('Invalid reorder indices for recent clips:', { startIndex, endIndex, length: typeClips.length });
+      return clips;
+    }
+    
+    // タイプ内での並び替え
+    const result = Array.from(typeClips);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    
+    // orderを更新（0から連番）
+    const updatedTypeClips = result.map((clip, index) => ({
+      ...clip,
+      order: index
+    }));
+    
+    // ピン留めクリップを先頭に、並び替えたタイプ別クリップを結合
+    const pinnedClips = otherClips.filter(clip => clip.pinned);
+    return [...pinnedClips, ...updatedTypeClips];
+  }
 }

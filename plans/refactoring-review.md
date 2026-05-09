@@ -74,15 +74,7 @@ static async saveDeck(deck: Deck, storageService: StorageService): Promise<void>
 
 **推奨アクション**: このメソッドを削除し、`StorageService.saveDeck` を直接使用
 
-### 2.3 MarimoAdapter の型安全性
-**ファイル**: [`src/notebook/marimoAdapter.ts`](src/notebook/marimoAdapter.ts:56)
-**問題**: `createMockCell` で `as any` が複数使用
-
-**推奨アクション**: 
-- 適切なインターフェースを定義して `as any` を排除
-- または `INotebookAdapter` の設計を見直し
-
-### 2.4 NotebookAdapter の型安全性
+### 2.3 NotebookAdapter の型安全性
 **ファイル**: [`src/notebook/notebookAdapter.ts`](src/notebook/notebookAdapter.ts:49)
 **問題**: `as any` cast が使用されている
 
